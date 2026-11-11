@@ -124,6 +124,10 @@ export function activate(context: vscode.ExtensionContext): void {
         provider.postConfig();
         canvasPanel.postConfig();
       }
+      if (e.affectsConfiguration("muse.useEchoProvider")) {
+        // Muse refuses to resume a session with a different provider.
+        provider.newSession("Provider changed, started a new session");
+      }
       if (e.affectsConfiguration("muse")) {
         void provider.refreshSetup();
         void maybeWarnYolo(context);

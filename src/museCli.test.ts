@@ -75,6 +75,32 @@ describe("buildMuseExecArgs", () => {
     expect(args).toContain("echo");
   });
 
+  test("always names the provider and skips model/effort for echo", () => {
+    const opts = {
+      prompt: "hi",
+      workspacePath: "/tmp/proj",
+      sessionId: "11111111-1111-1111-1111-111111111111",
+    };
+    const meta = buildMuseExecArgs({ ...base, model: "m", reasoningEffort: "low" }, opts).args;
+    expect(meta.slice(meta.indexOf("--provider"), meta.indexOf("--provider") + 2)).toEqual(["--provider", "meta"]);
+    expect(meta).toContain("--reasoning-effort");
+    const echo = buildMuseExecArgs(
+      { ...base, useEchoProvider: true, model: "m", reasoningEffort: "low" },
+      opts,
+    ).args;
+    expect(echo).not.toContain("--model");
+    expect(echo).not.toContain("--reasoning-effort");
+  });
+
+  test("a prompt that looks like a flag stays a prompt", () => {
+    const { args } = buildMuseExecArgs(base, {
+      prompt: "--disable-sandbox please",
+      workspacePath: "/tmp/proj",
+      sessionId: "11111111-1111-1111-1111-111111111111",
+    });
+    expect(args.slice(-2)).toEqual(["--", "--disable-sandbox please"]);
+  });
+
   test("blocks dangerous extraArgs", () => {
     const { args, rejectedExtraArgs } = buildMuseExecArgs(
       {

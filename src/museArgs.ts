@@ -121,6 +121,11 @@ export function sanitizeExtraArgs(extraArgs: string[] | undefined): {
   return { allowed, rejected };
 }
 
+/** Provider a run uses; a session must keep using the provider it started with. */
+export function museProviderId(settings: Pick<MuseSettings, "useEchoProvider">): "echo" | "meta" {
+  return settings.useEchoProvider ? "echo" : "meta";
+}
+
 export function buildMuseExecArgs(
   settings: MuseSettings,
   opts: { prompt: string; workspacePath: string; sessionId: string },
@@ -145,14 +150,17 @@ export function buildMuseExecArgs(
     }
   }
 
-  if (settings.useEchoProvider) {
-    args.push("--provider", "echo");
-  }
-  if (settings.model.trim()) {
-    args.push("--model", settings.model.trim());
-  }
-  if (settings.reasoningEffort.trim()) {
-    args.push("--reasoning-effort", settings.reasoningEffort.trim());
+  // Always name the provider: a Muse session keeps the provider it was created
+  // with, so leaving it implicit silently reuses echo after echo is turned off.
+  args.push("--provider", museProviderId(settings));
+  if (!settings.useEchoProvider) {
+    // Echo rejects --model / --reasoning-effort and exits without a reply.
+    if (settings.model.trim()) {
+      args.push("--model", settings.model.trim());
+    }
+    if (settings.reasoningEffort.trim()) {
+      args.push("--reasoning-effort", settings.reasoningEffort.trim());
+    }
   }
 
   const { allowed, rejected } = sanitizeExtraArgs(settings.extraArgs);
@@ -160,6 +168,7 @@ export function buildMuseExecArgs(
     args.push(...allowed);
   }
 
-  args.push(opts.prompt);
+  // "--" ends option parsing, so a prompt such as "--yolo …" stays a prompt.
+  args.push("--", opts.prompt);
   return { args, rejectedExtraArgs: rejected };
 }

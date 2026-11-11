@@ -449,7 +449,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  newSession(): void {
+  newSession(reason?: string): void {
     this.stop();
     this.hydrateEpoch += 1;
     const id = this.sessions.newSession();
@@ -458,7 +458,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     this.post({ type: "history", items: [], source: "new" });
     this.post({
       type: "status",
-      text: `New session ${id.slice(0, 8)}…`,
+      text: reason ? `${reason} (${id.slice(0, 8)})` : `New session ${id.slice(0, 8)}…`,
     });
     this.refreshStatusBar();
   }
