@@ -26,13 +26,36 @@ export interface DeleteMuseSessionsResult {
   errors: string[];
 }
 
-function normalizeWorkspacePath(workspacePath: string): string[] {
+/**
+ * Index keys a workspace may be stored under.
+ *
+ * On Windows, VS Code reports `c:\proj` (lower-case drive) while Muse stores
+ * `workspace_root` as `C:\proj` and `workspace_key` as the extended-length
+ * `\\?\C:\proj`. SQL `IN` is case-sensitive, so emit those spellings too.
+ */
+export function sessionIndexKeys(
+  workspacePath: string,
+  platform: NodeJS.Platform = process.platform,
+  realpath: (p: string) => string = realpathSync,
+): string[] {
   const trimmed = workspacePath.trim();
   const keys = new Set<string>([trimmed]);
   try {
-    keys.add(realpathSync(trimmed));
+    keys.add(realpath(trimmed));
   } catch {
     // ignore
+  }
+  if (platform === "win32") {
+    for (const k of [...keys]) {
+      const plain = k.replace(/^\\\\\?\\/, "").replace(/[\\/]+$/, "");
+      const upper = plain.replace(/^([a-z]):/, (_m, d: string) => `${d.toUpperCase()}:`);
+      for (const v of [plain, upper]) {
+        keys.add(v);
+        if (/^[A-Za-z]:\\/.test(v)) {
+          keys.add(`\\\\?\\${v}`);
+        }
+      }
+    }
   }
   return [...keys];
 }
@@ -148,7 +171,7 @@ export function listMuseSessionsForWorkspace(
   if (!existsSync(indexPath)) {
     return [];
   }
-  const keys = normalizeWorkspacePath(workspacePath);
+  const keys = sessionIndexKeys(workspacePath);
   if (!keys.length) {
     return [];
   }

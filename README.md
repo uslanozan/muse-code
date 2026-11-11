@@ -10,7 +10,7 @@ Privacy and security: [PRIVACY.md](./PRIVACY.md) · [SECURITY.md](./SECURITY.md)
 
 ## Requirements
 
-- macOS or Linux (Muse Code CLI does not support Windows yet)
+- macOS, Linux, or Windows (see [Windows](#windows))
 - [Muse Code](https://dev.meta.ai/docs/muse-code) installed and signed in (or `META_API_KEY` set)
 - VS Code or Cursor
 - An open workspace **folder** that is not a symlink root (Muse rejects reparse points)
@@ -22,6 +22,17 @@ muse login
 ```
 
 The sidebar treats Muse as ready only when the CLI is present **and** credentials are visible (`META_API_KEY` in the editor env, `~/.config/muse/auth.json` with an inline key/token **or** a Keychain-backed `muse login`, or `muse.useEchoProvider`). A key set only in your terminal shell does not reach Cursor/VS Code unless you launch the app from that shell or set it in the GUI environment.
+
+### Windows
+
+Install Muse Code with the official Windows installer ([docs](https://dev.meta.ai/docs/muse-code)). It installs per user into `%LOCALAPPDATA%\Programs\muse` as a `muse.cmd` launcher plus a signed `muse-bin-<version>.exe`.
+
+- With `muse.executablePath` left at `"muse"`, the extension reads `.muse-version` in that folder and runs the matching `muse-bin-<version>.exe` directly (no `cmd.exe`, no PowerShell). Install dirs on `PATH` and a plain `muse.exe` on `PATH` also work.
+- Setting `muse.executablePath` to the `muse.cmd` path (what `where muse` prints) is fine too; it is mapped to the exe beside it.
+- The launcher's self-update runs when you start `muse` from a terminal; the extension picks up the new version from `.muse-version` on the next run.
+- Credentials and sessions use the same locations as on Linux: `%USERPROFILE%\.config\muse\auth.json` and `%USERPROFILE%\.local\share\muse`.
+- **Stop** ends Muse and every process it started (`taskkill /T`), so dev servers launched by a turn do not linger.
+- On first run, Muse's Windows sandbox asks for elevation once to create its local sandbox accounts (`muse-sbx-*`); that is Muse itself, not this extension.
 
 ## Install (published)
 
@@ -55,14 +66,14 @@ Open this folder in VS Code/Cursor and press **F5** (Run Muse CLI Chat Extension
 1. Open a real directory (not a symlink)
 2. Command Palette → **Muse CLI Chat: Open Chat** (or click the Muse activity icon)
 3. Optional: set `muse.useEchoProvider` to `true` for offline JSONL UI testing
-4. Send a prompt (**⌘Enter** on macOS, **Ctrl+Enter** on Linux, or the Send button). Enter inserts a newline. Type `@` to attach a file with contents, or **+ Attach** for the current file, open editors, Problems, or terminal output.
+4. Send a prompt (**⌘Enter** on macOS, **Ctrl+Enter** on Linux and Windows, or the Send button). Enter inserts a newline. Type `@` to attach a file with contents, or **+ Attach** for the current file, open editors, Problems, or terminal output.
 
 ## Commands
 
 | Command | Action |
 |---------|--------|
 | Muse CLI Chat: Open Chat | Open the configured native chat surface |
-| Muse CLI Chat: Open in Editor Panel | Open the native chat in an editor panel (default shortcut `⌘⇧R` on macOS, `Ctrl+Shift+R` on Linux; rebind in Keyboard Shortcuts) |
+| Muse CLI Chat: Open in Editor Panel | Open the native chat in an editor panel (default shortcut `⌘⇧R` on macOS, `Ctrl+Shift+R` on Linux and Windows; rebind in Keyboard Shortcuts) |
 | Muse CLI Chat: Open in Sidebar | Open the native chat in the sidebar |
 | Muse CLI Chat: Open in New Window | Reopen the current workspace with Muse ready |
 | Muse CLI Chat: Send Selection | Send the editor selection as context |

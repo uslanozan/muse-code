@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Windows support.** Muse Code now ships for Windows, so the extension no longer refuses `win32`:
+  - `muse.executablePath: "muse"` resolves to the signed `muse-bin-<version>.exe` named by `.muse-version` in `%LOCALAPPDATA%\Programs\muse` (then install dirs / `muse.exe` on `PATH`). The `muse.cmd` shim cannot be spawned with `shell: false`, and going through `cmd.exe` would shell-parse prompts, so it is never used; a configured `muse.cmd` path maps to the exe beside it
+  - Stop kills the whole process tree with `taskkill /T` (Windows has no SIGINT/SIGTERM), and still reports the turn as Interrupted
+  - Session history matches Muse's Windows index keys (`C:\…` and `\\?\C:\…`) even though VS Code reports `c:\…`
+  - Editor context (open editors, Problems) and file chips/links understand backslash and drive-letter paths; `file:///C:/…` links map to `C:\…`; local `.html` reports open with Explorer
+- CI runs typecheck and tests on `windows-latest` as well as Ubuntu
+
 ## 0.5.1 - 2026-11-01
 
 ### Added

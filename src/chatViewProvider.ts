@@ -56,7 +56,7 @@ import { ensureHeadlessConsent } from "./safety";
 import type { SessionStore } from "./sessionStore";
 import { formatToolResult } from "./toolResultFormat";
 import { appendLiveUiEvent, type TranscriptItem } from "./transcript";
-import { inspectWorkspaceRoot } from "./workspace";
+import { inspectWorkspaceRoot, relativeToWorkspace } from "./workspace";
 import type { WorkspaceFolderStore } from "./workspaceFolder";
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
@@ -1358,12 +1358,11 @@ function severityName(severity: vscode.DiagnosticSeverity): string {
 
 function collectWorkspaceDiagnostics(workspacePath: string): SimplifiedDiagnostic[] {
   const out: SimplifiedDiagnostic[] = [];
-  const prefix = workspacePath.endsWith("/") ? workspacePath : `${workspacePath}/`;
   for (const [uri, diags] of vscode.languages.getDiagnostics()) {
-    if (uri.scheme !== "file" || !uri.fsPath.startsWith(prefix)) {
+    const rel = uri.scheme === "file" ? relativeToWorkspace(uri.fsPath, workspacePath) : null;
+    if (!rel) {
       continue;
     }
-    const rel = uri.fsPath.slice(prefix.length);
     for (const d of diags) {
       out.push({
         path: rel,
@@ -1387,7 +1386,6 @@ function collectWorkspaceDiagnostics(workspacePath: string): SimplifiedDiagnosti
 }
 
 function collectOpenEditors(workspacePath: string): EditorSnapshot[] {
-  const prefix = workspacePath.endsWith("/") ? workspacePath : `${workspacePath}/`;
   const active = vscode.window.activeTextEditor?.document.uri.fsPath;
   const visible = new Set(
     (vscode.window.visibleTextEditors ?? [])
@@ -1395,7 +1393,10 @@ function collectOpenEditors(workspacePath: string): EditorSnapshot[] {
       .filter(Boolean),
   );
   const docs = vscode.workspace.textDocuments.filter(
-    (doc) => doc.uri.scheme === "file" && !doc.isUntitled && doc.uri.fsPath.startsWith(prefix),
+    (doc) =>
+      doc.uri.scheme === "file" &&
+      !doc.isUntitled &&
+      relativeToWorkspace(doc.uri.fsPath, workspacePath) !== null,
   );
   docs.sort((a, b) => {
     const rank = (fsPath: string): number => {
@@ -1413,7 +1414,7 @@ function collectOpenEditors(workspacePath: string): EditorSnapshot[] {
     const text = doc.getText();
     const truncated = text.length > MAX_EDITOR_CHARS;
     return {
-      path: doc.uri.fsPath.slice(prefix.length),
+      path: relativeToWorkspace(doc.uri.fsPath, workspacePath) ?? doc.uri.fsPath,
       content: truncated ? text.slice(0, MAX_EDITOR_CHARS) : text,
       truncated,
     };

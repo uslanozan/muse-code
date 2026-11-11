@@ -39,13 +39,17 @@ export const CANVAS_FILE_EXT_RE = new RegExp(`\\.(?:${DOC_EXT_ALT})$`, "i");
  * A local path must start at a token boundary, so a relative path keeps its
  * first segment (`docs/STATUS.md`, not `/STATUS.md`) and a path fragment inside
  * a placeholder like `<root>/…/session.jsonl` is not mistaken for a real one.
- * Absolute, `~/`, `./`, `../`, and workspace-relative forms all match.
+ * Absolute, `~/`, `./`, `../`, and workspace-relative forms all match, with
+ * either separator and an optional drive letter (`C:\proj\docs\STATUS.md`).
  */
-const LOCAL_PATH_SOURCE = `(?<![\\w.~/-])/?(?:[\\w.~-]+/)*[\\w.~-]+`;
+const PATH_SEP = `[\\\\/]`;
+const PATH_BOUNDARY = `(?<![\\w.~/\\\\-])`;
+const ABS_PREFIX = `(?:[A-Za-z]:)?${PATH_SEP}`;
+const LOCAL_PATH_SOURCE = `${PATH_BOUNDARY}(?:${ABS_PREFIX})?(?:[\\w.~-]+${PATH_SEP})*[\\w.~-]+`;
 
 /** Same, but the path must name a directory, so a bare `file.txt` in `ls`
  * output is not mistaken for a document reference. */
-const LOCAL_DIR_PATH_SOURCE = `(?<![\\w.~/-])(?:/(?:[\\w.~-]+/)*|(?:[\\w.~-]+/)+)[\\w.~-]+`;
+const LOCAL_DIR_PATH_SOURCE = `${PATH_BOUNDARY}(?:${ABS_PREFIX}(?:[\\w.~-]+${PATH_SEP})*|(?:[\\w.~-]+${PATH_SEP})+)[\\w.~-]+`;
 
 const SCHEME_PATH_SOURCE = `(?:https?://|file://)[^\\s<>"']+`;
 

@@ -30,6 +30,25 @@ export interface MuseRunHandle {
   stop: () => void;
 }
 
+/**
+ * `child.kill()` on Windows calls TerminateProcess on muse only, orphaning the
+ * shells/dev servers it started. `taskkill /T` ends the whole tree.
+ */
+function killWindowsProcessTree(child: ChildProcess): void {
+  if (child.exitCode !== null || child.pid === undefined) {
+    return;
+  }
+  const systemRoot = process.env.SystemRoot || "C:\\Windows";
+  const killer = spawn(
+    `${systemRoot}\\System32\\taskkill.exe`,
+    ["/PID", String(child.pid), "/T", "/F"],
+    { stdio: "ignore", shell: false, windowsHide: true },
+  );
+  killer.on("error", () => {
+    child.kill();
+  });
+}
+
 export function readMuseSettings(): MuseSettings {
   const cfg = vscode.workspace.getConfiguration("muse");
   return {
@@ -122,6 +141,8 @@ export function startMuseExec(opts: MuseRunOptions): MuseRunHandle {
     opts.onExit?.(null, null);
   });
 
+  let stopRequested = false;
+
   child.on("close", (code, signal) => {
     const rest = buffer.flush();
     if (rest) {
@@ -129,12 +150,19 @@ export function startMuseExec(opts: MuseRunOptions): MuseRunHandle {
         opts.onEvent(event);
       }
     }
-    opts.onExit?.(code, signal);
+    // Windows has no signals: a stopped process just exits with a code, so
+    // report the stop the way POSIX callers already expect.
+    opts.onExit?.(code, signal ?? (stopRequested ? "SIGTERM" : null));
   });
 
   return {
     child,
     stop: () => {
+      stopRequested = true;
+      if (process.platform === "win32") {
+        killWindowsProcessTree(child);
+        return;
+      }
       if (!child.killed) {
         child.kill("SIGINT");
         setTimeout(() => {

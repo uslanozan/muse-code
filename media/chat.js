@@ -67,7 +67,7 @@
 
   // keep in sync with canvas.js:LINK_RE and previewContent.ts:DOC_PATH_SOURCE
   const LINK_RE =
-    /(?:(?:https?:\/\/|file:\/\/)[^\s<>"']+|(?<![\w.~/-])\/?(?:[\w.~-]+\/)*[\w.~-]+\.(?:html?|pdf|markdown|md|jsonl?|ya?ml|toon|csv|tsv|txt|xlsx?|svg|png|jpe?g|gif|webp)(?![A-Za-z0-9]))/gi;
+    /(?:(?:https?:\/\/|file:\/\/)[^\s<>"']+|(?<![\w.~/\\-])(?:(?:[A-Za-z]:)?[\\/])?(?:[\w.~-]+[\\/])*[\w.~-]+\.(?:html?|pdf|markdown|md|jsonl?|ya?ml|toon|csv|tsv|txt|xlsx?|svg|png|jpe?g|gif|webp)(?![A-Za-z0-9]))/gi;
 
   function scrollBottom() {
     transcript.scrollTop = transcript.scrollHeight;

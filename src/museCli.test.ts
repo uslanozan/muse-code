@@ -105,8 +105,9 @@ describe("sanitizeExtraArgs", () => {
 
 describe("resolveMuseBinary", () => {
   test("allows muse PATH name", () => {
-    expect(resolveMuseBinary("muse")).toEqual({ ok: true, path: "muse" });
-    expect(resolveMuseBinary("")).toEqual({ ok: true, path: "muse" });
+    // win32 maps bare `muse` to the installed exe (see museWindows.test.ts).
+    expect(resolveMuseBinary("muse", "linux")).toEqual({ ok: true, path: "muse" });
+    expect(resolveMuseBinary("", "darwin")).toEqual({ ok: true, path: "muse" });
   });
 
   test("rejects other bare names", () => {

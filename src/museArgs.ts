@@ -1,5 +1,12 @@
 import { existsSync, statSync } from "node:fs";
 import { isAbsolute } from "node:path";
+import {
+  defaultWindowsResolveDeps,
+  isWindowsShimPath,
+  resolveWindowsMuseCommand,
+  resolveWindowsShimPath,
+  type WindowsResolveDeps,
+} from "./museWindows";
 
 export interface MuseSettings {
   executablePath: string;
@@ -28,8 +35,15 @@ const BLOCKED_EXTRA_FLAGS = new Set([
  * - `"muse"` (default): leave to PATH (no silent ~/.local preference).
  * - Absolute or relative path: must exist and be a regular file.
  * - Other bare names are rejected (prevents accidental / malicious aliases).
+ * - Windows: `"muse"` and paths to the `muse.cmd` launcher shim resolve to the
+ *   versioned `muse-bin-<version>.exe`, since `.cmd` files cannot be spawned
+ *   with `shell: false` (see museWindows.ts).
  */
-export function resolveMuseBinary(configured: string): ResolveBinaryResult {
+export function resolveMuseBinary(
+  configured: string,
+  platform: NodeJS.Platform = process.platform,
+  windowsDeps: WindowsResolveDeps = defaultWindowsResolveDeps,
+): ResolveBinaryResult {
   const trimmed = (configured || "muse").trim();
   if (!trimmed) {
     return { ok: false, error: "muse.executablePath is empty." };
@@ -65,6 +79,9 @@ export function resolveMuseBinary(configured: string): ResolveBinaryResult {
       const msg = err instanceof Error ? err.message : String(err);
       return { ok: false, error: `Cannot stat muse.executablePath: ${msg}` };
     }
+    if (platform === "win32" && isWindowsShimPath(trimmed)) {
+      return resolveWindowsShimPath(trimmed, windowsDeps);
+    }
     return { ok: true, path: trimmed };
   }
 
@@ -73,6 +90,10 @@ export function resolveMuseBinary(configured: string): ResolveBinaryResult {
       ok: false,
       error: `muse.executablePath must be "muse" or a filesystem path to the binary (got "${trimmed}").`,
     };
+  }
+
+  if (platform === "win32") {
+    return resolveWindowsMuseCommand(windowsDeps);
   }
 
   return { ok: true, path: "muse" };
