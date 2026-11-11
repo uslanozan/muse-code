@@ -55,7 +55,16 @@
         {
           "id": "muse-activity",
           "title": "Muse CLI Chat",
-          "icon": "media/muse.svg"
+          "icon": "media/muse.svg",
+          "when": "muse.doesNotSupportSecondarySidebar"
+        }
+      ],
+      "secondarySidebar": [
+        {
+          "id": "muse-secondary",
+          "title": "Muse CLI Chat",
+          "icon": "media/muse.svg",
+          "when": "!muse.doesNotSupportSecondarySidebar"
         }
       ]
     },
@@ -64,7 +73,16 @@
         {
           "type": "webview",
           "id": "muse.chatView",
-          "name": "Muse"
+          "name": "Muse",
+          "when": "muse.doesNotSupportSecondarySidebar"
+        }
+      ],
+      "muse-secondary": [
+        {
+          "type": "webview",
+          "id": "muse.chatViewSecondary",
+          "name": "Muse",
+          "when": "!muse.doesNotSupportSecondarySidebar"
         }
       ]
     },
@@ -92,11 +110,6 @@
       {
         "command": "muse.openSecondarySidebar",
         "title": "Muse CLI Chat: Open in Sidebar",
-        "icon": "$(layout-sidebar-right)"
-      },
-      {
-        "command": "muse.moveToSecondarySidebar",
-        "title": "Muse CLI Chat: Move Chat to Right Side Bar",
         "icon": "$(layout-sidebar-right)"
       },
       {
@@ -186,6 +199,14 @@
         "command": "muse.openSettings",
         "title": "Muse: Agent Settings",
         "icon": "$(gear)"
+      },
+      {
+        "command": "muse.toggleChat",
+        "title": "Muse CLI Chat: Toggle Chat",
+        "icon": {
+          "light": "media/muse-toolbar-light.svg",
+          "dark": "media/muse-toolbar-dark.svg"
+        }
       }
     ],
     "keybindings": [
@@ -216,11 +237,6 @@
         }
       ],
       "view/title": [
-        {
-          "command": "muse.moveToSecondarySidebar",
-          "when": "view =~ /muse\\.chatView/",
-          "group": "navigation@0"
-        },
         {
           "command": "muse.selectWorkspaceFolder",
           "when": "view =~ /muse\\.chatView/ && workspaceFolderCount > 1",
@@ -311,6 +327,10 @@
           "command": "muse.openSettings",
           "when": "activeWebviewPanelId == muse.chatPanel",
           "group": "muse@3"
+        },
+        {
+          "command": "muse.toggleChat",
+          "group": "navigation@100"
         }
       ],
       "editor/context": [

@@ -10,12 +10,14 @@
   - Session history matches Muse's Windows index keys (`C:\…` and `\\?\C:\…`) even though VS Code reports `c:\…`
   - Editor context (open editors, Problems) and file chips/links understand backslash and drive-letter paths; `file:///C:/…` links map to `C:\…`; local `.html` reports open with Explorer
 - CI runs typecheck and tests on `windows-latest` as well as Ubuntu
-- **Move Chat to Right Side Bar** (`muse.moveToSecondarySidebar`, view toolbar): focuses the chat and opens VS Code's own Move View picker, so it can be docked in the secondary side bar without contributing a secondary-side-bar container (which Cursor rejects). VS Code remembers the location
+- **Chat lives in the secondary (right) side bar** on VS Code 1.106+, so Explorer stays visible while Muse works. Both a secondary-side-bar and an activity-bar container are declared and a context key (`muse.doesNotSupportSecondarySidebar`) picks one, the same pattern Codex and Claude Code use; Cursor and older VS Code keep the activity-bar view. Cursor may log a warning about the secondary-side-bar contribution at startup
+- **Editor title toggle** (`muse.toggleChat`): one click shows the chat, a second click hides its side bar
 
 ### Changed
 
 - **Chat panel layout.** One-line header (name, session id, history and new-session icons); a single composer box with the attach button, mode/model/effort, and one Send/Stop button inside it; the duplicate History button and the always-on help text are gone. Tips and the unofficial notice now show in an empty-state welcome instead. Assistant replies render as plain text without a card, tool calls as compact rows with a green/red status dot, and inline code, code blocks and links use theme colors. Icons are inline SVG because the webview CSP blocks icon fonts
-- View toolbar keeps two icons (Move to Right Side Bar, Open in Editor Panel); session, view and link actions moved to the `…` menu
+- View toolbar keeps the Open in Editor Panel icon; session, view and link actions moved to the `…` menu
+- Run-setting pills sit under the input box with short labels (`Headless`, `Model auto`, `Effort default`; full text in the tooltip) so they never truncate in a narrow side bar
 
 ## 0.5.1 - 2026-11-01
 

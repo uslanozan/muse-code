@@ -34,8 +34,7 @@
     typeof navigator !== "undefined" &&
     /Mac|iPhone|iPad/.test(navigator.platform || "");
   const submitChord = isMac ? "⌘Enter" : "Ctrl+Enter";
-  input.placeholder =
-    "Ask Muse… (@ attach file, " + submitChord + " to send)";
+  input.placeholder = "Ask Muse… (" + submitChord + " to send)";
   sendBtn.title = "Send (" + submitChord + ")";
   if (focusHint) {
     focusHint.textContent = isMac
@@ -746,15 +745,23 @@
   }
 
   function renderPills(msg) {
+    // Short labels so all three fit on one line in a narrow side bar; the
+    // tooltip carries the full "Key: value" text.
     if (modePill && msg.executionModeLabel) {
-      modePill.textContent = "Mode: " + msg.executionModeLabel;
-      modePill.title = msg.executionModeDescription || "Switch execution mode";
+      modePill.textContent = msg.executionModeLabel;
+      modePill.title =
+        "Mode: " + msg.executionModeLabel +
+        (msg.executionModeDescription ? " — " + msg.executionModeDescription : "") +
+        " (click to switch)";
     }
     if (modelPill && msg.model !== undefined) {
-      modelPill.textContent = "Model: " + formatModelPill(msg.model);
+      modelPill.textContent = "Model " + formatModelPill(msg.model);
+      modelPill.title = "Model: " + formatModelPill(msg.model) + " (opens settings)";
     }
     if (effortPill && msg.reasoningEffort !== undefined) {
-      effortPill.textContent = "Effort: " + formatEffortPill(msg.reasoningEffort);
+      effortPill.textContent = "Effort " + formatEffortPill(msg.reasoningEffort);
+      effortPill.title =
+        "Reasoning effort: " + formatEffortPill(msg.reasoningEffort) + " (opens settings)";
     }
   }
 

@@ -854,9 +854,10 @@ describe("editor tab header, banner, and pills", () => {
     expect(chat.modeBanner.hidden).toBe(false);
     expect(chat.modeBannerText.textContent).toContain("Headless mode active");
     expect(chat.modeBannerText.textContent).toContain("Native chat path.");
-    expect(chat.modePill.textContent).toBe("Mode: Headless");
-    expect(chat.modelPill.textContent).toBe("Model: auto");
-    expect(chat.effortPill.textContent).toBe("Effort: default");
+    expect(chat.modePill.textContent).toBe("Headless");
+    expect(chat.modePill.title).toContain("Mode: Headless");
+    expect(chat.modelPill.textContent).toBe("Model auto");
+    expect(chat.effortPill.textContent).toBe("Effort default");
   });
 
   test("pills render configured model and effort", () => {
@@ -866,8 +867,8 @@ describe("editor tab header, banner, and pills", () => {
       model: "muse-3",
       reasoningEffort: "medium",
     });
-    expect(chat.modelPill.textContent).toBe("Model: muse-3");
-    expect(chat.effortPill.textContent).toBe("Effort: Medium");
+    expect(chat.modelPill.textContent).toBe("Model muse-3");
+    expect(chat.effortPill.textContent).toBe("Effort Medium");
   });
 
   test("dismiss hides the banner until the mode changes", () => {

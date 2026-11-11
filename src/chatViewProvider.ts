@@ -61,6 +61,7 @@ import type { WorkspaceFolderStore } from "./workspaceFolder";
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "muse.chatView";
+  private chatView: vscode.WebviewView | undefined;
   public static readonly editorViewType = "muse.chatPanel";
 
   private readonly webviews = new Set<vscode.Webview>();
@@ -76,6 +77,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     private readonly sessions: SessionStore,
     private readonly folders: WorkspaceFolderStore,
     private readonly canvasPanel: CanvasPanel,
+    /** View id that is shown in this host (secondary side bar when supported). */
+    private readonly chatViewId: string = ChatViewProvider.viewType,
   ) {
     this.status = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Right,
@@ -92,7 +95,13 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     _token: vscode.CancellationToken,
   ): void {
     const dispose = this.attachWebview(webviewView.webview);
-    webviewView.onDidDispose(dispose);
+    this.chatView = webviewView;
+    webviewView.onDidDispose(() => {
+      if (this.chatView === webviewView) {
+        this.chatView = undefined;
+      }
+      dispose();
+    });
   }
 
   /** Attach a panel or view to the shared chat session. */
@@ -420,7 +429,23 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   }
 
   reveal(): void {
-    void vscode.commands.executeCommand(`${ChatViewProvider.viewType}.focus`);
+    void vscode.commands.executeCommand(`${this.chatViewId}.focus`);
+  }
+
+  /**
+   * Editor-title / status-bar toggle: show the chat, or hide its side bar when
+   * the chat is already showing, so one click flips between code and chat.
+   */
+  async toggle(): Promise<void> {
+    if (this.chatView?.visible) {
+      const close =
+        this.chatViewId === ChatViewProvider.viewType
+          ? "workbench.action.closeSidebar"
+          : "workbench.action.closeAuxiliaryBar";
+      await vscode.commands.executeCommand(close);
+      return;
+    }
+    this.reveal();
   }
 
   async openPanel(column = vscode.ViewColumn.Beside): Promise<void> {
@@ -1295,17 +1320,17 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             <button type="button" data-attach="terminal" role="menuitem">Terminal output</button>
           </div>
         </div>
-        <div class="pills" role="group" aria-label="Run settings">
-          <button type="button" id="mode-pill" class="pill" title="Switch execution mode"></button>
-          <button type="button" id="model-pill" class="pill" title="Model (opens settings)"></button>
-          <button type="button" id="effort-pill" class="pill" title="Reasoning effort (opens settings)"></button>
-        </div>
         <button type="button" id="history" class="history-dup" hidden>History</button>
         <button type="button" id="stop" class="round-btn stop-btn" disabled title="Stop" aria-label="Stop">${ICON_STOP}</button>
         <button type="button" id="send" class="round-btn send-btn" title="Send (⌘Enter)" aria-label="Send">${ICON_SEND}</button>
       </div>
     </div>
     <div class="composer-foot">
+      <div class="pills" role="group" aria-label="Run settings">
+        <button type="button" id="mode-pill" class="pill" title="Switch execution mode"></button>
+        <button type="button" id="model-pill" class="pill" title="Model (opens settings)"></button>
+        <button type="button" id="effort-pill" class="pill" title="Reasoning effort (opens settings)"></button>
+      </div>
       <span id="focus-hint" class="focus-hint"></span>
     </div>
   </footer>

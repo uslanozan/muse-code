@@ -5,10 +5,19 @@ import { maybeWarnYolo } from "./safety";
 import { SessionStore } from "./sessionStore";
 import { WorkspaceFolderStore } from "./workspaceFolder";
 import { normalizeExecutionMode } from "./executionMode";
+import {
+  NO_SECONDARY_CONTEXT_KEY,
+  PRIMARY_VIEW_ID,
+  SECONDARY_VIEW_ID,
+  supportsSecondarySidebar,
+} from "./viewLocation";
 
 const OPEN_ON_ACTIVATE_KEY = "muse.openOnActivate";
 
 export function activate(context: vscode.ExtensionContext): void {
+  const onSecondary = supportsSecondarySidebar(vscode.version, vscode.env.appName);
+  void vscode.commands.executeCommand("setContext", NO_SECONDARY_CONTEXT_KEY, !onSecondary);
+
   const sessions = new SessionStore(context);
   const folders = new WorkspaceFolderStore(context);
   const canvasPanel = new CanvasPanel(context.extensionUri, folders);
@@ -17,6 +26,7 @@ export function activate(context: vscode.ExtensionContext): void {
     sessions,
     folders,
     canvasPanel,
+    onSecondary ? SECONDARY_VIEW_ID : PRIMARY_VIEW_ID,
   );
 
   const openPreferred = async (): Promise<void> => {
@@ -47,21 +57,15 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.window.registerWebviewViewProvider(ChatViewProvider.viewType, provider, {
       webviewOptions: { retainContextWhenHidden: true },
     }),
+    vscode.window.registerWebviewViewProvider(SECONDARY_VIEW_ID, provider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
     vscode.commands.registerCommand("muse.openChat", () => openPreferred()),
     vscode.commands.registerCommand("muse.open", () => openPreferred()),
     vscode.commands.registerCommand("muse.openPanel", () => provider.openPanel()),
     vscode.commands.registerCommand("muse.openEditor", () => provider.openPanel()),
     vscode.commands.registerCommand("muse.openSecondarySidebar", () => provider.reveal()),
-    vscode.commands.registerCommand("muse.moveToSecondarySidebar", async () => {
-      // There is no API to relocate a view container, and contributing one to
-      // the secondary side bar breaks Cursor. VS Code's own "Move View" picker
-      // works in both and remembers the choice, so focus the view and open it.
-      await vscode.commands.executeCommand(`${ChatViewProvider.viewType}.focus`);
-      void vscode.window.showInformationMessage(
-        'Pick "New Secondary Side Bar Entry" to dock Muse on the right. Run the same command again to move it back.',
-      );
-      await vscode.commands.executeCommand("workbench.action.moveFocusedView");
-    }),
+    vscode.commands.registerCommand("muse.toggleChat", () => provider.toggle()),
     vscode.commands.registerCommand("muse.openNewWindow", async () => {
       const folder = folders.getFolder() ?? vscode.workspace.workspaceFolders?.[0];
       if (!folder) {
