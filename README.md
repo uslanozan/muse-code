@@ -74,6 +74,7 @@ Open this folder in VS Code/Cursor and press **F5** (Run Muse CLI Chat Extension
 |---------|--------|
 | Muse CLI Chat: Open Chat | Open the configured native chat surface |
 | Muse CLI Chat: Open in Editor Panel | Open the native chat in an editor panel (default shortcut `⌘⇧R` on macOS, `Ctrl+Shift+R` on Linux and Windows; rebind in Keyboard Shortcuts) |
+| Muse CLI Chat: Move Chat to Right Side Bar | Dock the chat in the secondary (right) side bar via VS Code's Move View picker; run again to move it back |
 | Muse CLI Chat: Open in Sidebar | Open the native chat in the sidebar |
 | Muse CLI Chat: Open in New Window | Reopen the current workspace with Muse ready |
 | Muse CLI Chat: Send Selection | Send the editor selection as context |

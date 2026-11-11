@@ -1236,29 +1236,25 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 <body>
   <header class="top">
     <div class="top-row">
-      <div class="brand">Muse CLI Chat</div>
-      <div class="toolbar" role="toolbar" aria-label="Session">
-        <button type="button" id="toolbar-history" class="icon-btn" title="Session history">History</button>
-        <button type="button" id="toolbar-new" class="icon-btn" title="New session">+ New</button>
-      </div>
-    </div>
-    <div class="sub-row">
-      <div class="unofficial">
-        Unofficial · wraps Meta Muse Code
-        <!-- <button type="button" id="muse-ai" class="muse-ai-link" title="Copy this session and open muse.ai">muse.ai</button> -->
+      <div class="brand">
+        <span class="brand-name">Muse</span>
+        <button type="button" id="session-btn" class="session-btn" title="Resume or start a Muse session">
+          <span id="session" class="session">————</span>
+        </button>
       </div>
       <div class="meta">
         <div id="folder" class="folder"></div>
         <div id="execution-mode" class="execution-mode" title=""></div>
-        <button type="button" id="session-btn" class="session-btn" title="Resume or start a Muse session">
-          <span id="session" class="session">————</span>
-        </button>
+      </div>
+      <div class="toolbar" role="toolbar" aria-label="Session">
+        <button type="button" id="toolbar-history" class="icon-btn" title="Session history" aria-label="Session history">${ICON_HISTORY}</button>
+        <button type="button" id="toolbar-new" class="icon-btn" title="New session" aria-label="New session">${ICON_PLUS}</button>
       </div>
     </div>
   </header>
   <div id="mode-banner" class="mode-banner" hidden>
     <span id="mode-banner-text" class="mode-banner-text"></span>
-    <button type="button" id="mode-banner-dismiss" class="secondary mode-banner-dismiss">Dismiss</button>
+    <button type="button" id="mode-banner-dismiss" class="mode-banner-dismiss" title="Dismiss" aria-label="Dismiss">${ICON_CLOSE}</button>
   </div>
   <div id="setup" class="setup" hidden>
     <p id="setup-msg" class="setup-msg"></p>
@@ -1270,40 +1266,65 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     </div>
   </div>
   <main id="transcript" class="transcript" aria-live="polite"></main>
+  <section class="welcome" aria-label="Getting started">
+    <div class="welcome-mark">${ICON_MUSE}</div>
+    <h1 class="welcome-title">What should Muse build?</h1>
+    <ul class="welcome-tips">
+      <li><kbd>@</kbd> attaches a file with its contents</li>
+      <li><strong>Attach</strong> adds Problems, terminal output, or open editors</li>
+      <li>Changed files open as diffs after each turn</li>
+    </ul>
+    <p class="unofficial">
+      Unofficial · wraps Meta Muse Code · not affiliated with Meta
+      <!-- <button type="button" id="muse-ai" class="muse-ai-link" title="Copy this session and open muse.ai">muse.ai</button> -->
+    </p>
+  </section>
   <footer class="composer">
-    <div class="composer-head">
-      <span id="focus-hint" class="focus-hint"></span>
-    </div>
     <div id="attachments" class="attachments" hidden aria-label="Attached context"></div>
     <div id="mentions" class="mentions" hidden role="listbox" aria-label="File mentions"></div>
-    <textarea id="input" rows="3" placeholder="Ask Muse… (@ file, ⌘Enter to send)"></textarea>
-    <div class="actions">
-      <div class="attach-wrap">
-        <button type="button" id="attach" class="secondary" title="Attach file contents, problems, terminal output, or open editors">+ Attach</button>
-        <div id="attach-menu" class="attach-menu" hidden role="menu">
-          <button type="button" data-attach="file" role="menuitem">File… (@)</button>
-          <button type="button" data-attach="current" role="menuitem">Current file</button>
-          <button type="button" data-attach="editors" role="menuitem">Open editors</button>
-          <button type="button" data-attach="problems" role="menuitem">Problems</button>
-          <button type="button" data-attach="terminal" role="menuitem">Terminal output</button>
+    <div class="input-box">
+      <textarea id="input" rows="2" placeholder="Ask Muse… (@ file, ⌘Enter to send)"></textarea>
+      <div class="actions">
+        <div class="attach-wrap">
+          <button type="button" id="attach" class="icon-btn" title="Attach file contents, problems, terminal output, or open editors" aria-label="Attach context">${ICON_ATTACH}</button>
+          <div id="attach-menu" class="attach-menu" hidden role="menu">
+            <button type="button" data-attach="file" role="menuitem">File… (@)</button>
+            <button type="button" data-attach="current" role="menuitem">Current file</button>
+            <button type="button" data-attach="editors" role="menuitem">Open editors</button>
+            <button type="button" data-attach="problems" role="menuitem">Problems</button>
+            <button type="button" data-attach="terminal" role="menuitem">Terminal output</button>
+          </div>
         </div>
+        <div class="pills" role="group" aria-label="Run settings">
+          <button type="button" id="mode-pill" class="pill" title="Switch execution mode"></button>
+          <button type="button" id="model-pill" class="pill" title="Model (opens settings)"></button>
+          <button type="button" id="effort-pill" class="pill" title="Reasoning effort (opens settings)"></button>
+        </div>
+        <button type="button" id="history" class="history-dup" hidden>History</button>
+        <button type="button" id="stop" class="round-btn stop-btn" disabled title="Stop" aria-label="Stop">${ICON_STOP}</button>
+        <button type="button" id="send" class="round-btn send-btn" title="Send (⌘Enter)" aria-label="Send">${ICON_SEND}</button>
       </div>
-      <div class="pills" role="group" aria-label="Run settings">
-        <button type="button" id="mode-pill" class="pill" title="Switch execution mode"></button>
-        <button type="button" id="model-pill" class="pill" title="Model (opens settings)"></button>
-        <button type="button" id="effort-pill" class="pill" title="Reasoning effort (opens settings)"></button>
-      </div>
-      <button type="button" id="history" class="secondary">History</button>
-      <button type="button" id="stop" class="secondary" disabled>Stop</button>
-      <button type="button" id="send" class="primary send-btn" title="Send (⌘Enter)">↑ Send</button>
     </div>
-    <p class="hint">Type @ to attach a file with contents. + Attach adds problems, terminal output, or open editors. After a turn, changed-file diffs open in canvas. Not affiliated with Meta.</p>
+    <div class="composer-foot">
+      <span id="focus-hint" class="focus-hint"></span>
+    </div>
   </footer>
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
   }
 }
+
+/* Inline SVG icons (the webview CSP blocks icon fonts). currentColor keeps them themed. */
+const svg = (body: string, size = 16): string =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+const ICON_HISTORY = svg('<path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"/><path d="M2.5 2.5v2.2h2.2"/><path d="M8 5v3.2l2 1.3"/>');
+const ICON_PLUS = svg('<path d="M8 3v10M3 8h10"/>');
+const ICON_CLOSE = svg('<path d="M4 4l8 8M12 4l-8 8"/>', 14);
+const ICON_ATTACH = svg('<path d="M10.5 5 5.8 9.7a1.3 1.3 0 0 0 1.9 1.9l5-5a2.6 2.6 0 0 0-3.7-3.7l-5 5a3.9 3.9 0 0 0 5.5 5.5L14 9"/>');
+const ICON_SEND = svg('<path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/>');
+const ICON_STOP = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5" fill="currentColor"/></svg>';
+const ICON_MUSE = svg('<path d="M2 12.5V4l3 4.5L8 4l3 4.5L14 4v8.5"/>', 28);
 
 function getNonce(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

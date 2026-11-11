@@ -95,6 +95,11 @@
         "icon": "$(layout-sidebar-right)"
       },
       {
+        "command": "muse.moveToSecondarySidebar",
+        "title": "Muse CLI Chat: Move Chat to Right Side Bar",
+        "icon": "$(layout-sidebar-right)"
+      },
+      {
         "command": "muse.openNewWindow",
         "title": "Muse CLI Chat: Open in New Window",
         "icon": "$(window)"
@@ -212,34 +217,39 @@
       ],
       "view/title": [
         {
+          "command": "muse.moveToSecondarySidebar",
+          "when": "view =~ /muse\\.chatView/",
+          "group": "navigation@0"
+        },
+        {
           "command": "muse.selectWorkspaceFolder",
           "when": "view =~ /muse\\.chatView/ && workspaceFolderCount > 1",
-          "group": "navigation@0"
+          "group": "1_session@2"
         },
         {
           "command": "muse.pickSession",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation@1"
+          "group": "1_session@1"
         },
         {
           "command": "muse.cleanupSessions",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation@2"
+          "group": "1_session@4"
         },
         {
           "command": "muse.openInCanvas",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation@3"
+          "group": "2_view@2"
         },
         {
           "command": "muse.expandAll",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation@4"
+          "group": "2_view@0"
         },
         {
           "command": "muse.collapseAll",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation@5"
+          "group": "2_view@1"
         },
         {
           "command": "muse.openPanel",
@@ -249,32 +259,32 @@
         {
           "command": "muse.newSession",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation"
+          "group": "1_session@0"
         },
         {
           "command": "muse.stop",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation"
+          "group": "1_session@3"
         },
         {
           "command": "muse.openInteractiveTerminal",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation"
+          "group": "3_open@0"
         },
         {
           "command": "muse.openMuseAi",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation"
+          "group": "3_open@1"
         },
         {
           "command": "muse.openWebsite",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation"
+          "group": "3_open@2"
         },
         {
           "command": "muse.openBilling",
           "when": "view =~ /muse\\.chatView/",
-          "group": "navigation"
+          "group": "3_open@3"
         }
       ],
       "editor/title": [
@@ -334,8 +344,8 @@
             "terminal"
           ],
           "enumDescriptions": [
-            "Open the native chat in the sidebar.",
-            "Open the native chat in an editor panel.",
+            "Open the chat view in the side bar. It starts on the left; run 'Muse CLI Chat: Move Chat to Right Side Bar' once to dock it on the right (VS Code remembers the place).",
+            "Open the chat as an editor tab beside the current editor.",
             "Open the Muse interactive terminal."
           ],
           "default": "secondarySidebar",

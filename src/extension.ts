@@ -52,6 +52,16 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand("muse.openPanel", () => provider.openPanel()),
     vscode.commands.registerCommand("muse.openEditor", () => provider.openPanel()),
     vscode.commands.registerCommand("muse.openSecondarySidebar", () => provider.reveal()),
+    vscode.commands.registerCommand("muse.moveToSecondarySidebar", async () => {
+      // There is no API to relocate a view container, and contributing one to
+      // the secondary side bar breaks Cursor. VS Code's own "Move View" picker
+      // works in both and remembers the choice, so focus the view and open it.
+      await vscode.commands.executeCommand(`${ChatViewProvider.viewType}.focus`);
+      void vscode.window.showInformationMessage(
+        'Pick "New Secondary Side Bar Entry" to dock Muse on the right. Run the same command again to move it back.',
+      );
+      await vscode.commands.executeCommand("workbench.action.moveFocusedView");
+    }),
     vscode.commands.registerCommand("muse.openNewWindow", async () => {
       const folder = folders.getFolder() ?? vscode.workspace.workspaceFolders?.[0];
       if (!folder) {
