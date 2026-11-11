@@ -84,7 +84,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       vscode.StatusBarAlignment.Right,
       100,
     );
-    this.status.command = "muse.openChat";
+    // Always toggles the chat view, so it can be reopened after its side bar is closed
+    // (the editor-title button only shows while an editor is open).
+    this.status.command = "muse.toggleChat";
     this.terminalOutput.start();
     this.refreshStatusBar();
   }
